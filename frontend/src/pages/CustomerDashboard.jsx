@@ -27,9 +27,9 @@ export default function CustomerDashboard() {
   });
 
   // Application form state
-  const [loanAmount, setLoanAmount] = useState(25000);
-  const [salary, setSalary] = useState(65000);
-  const [creditScore, setCreditScore] = useState(650);
+  const [loanAmount, setLoanAmount] = useState('');
+  const [salary, setSalary] = useState('');
+  const [creditScore, setCreditScore] = useState('');
   const [employment, setEmployment] = useState('Salaried');
   const [education, setEducation] = useState('Graduate');
   const [submittingApp, setSubmittingApp] = useState(false);

@@ -10,9 +10,9 @@ import { formatErrorMessage } from '../utils/errorUtils';
 import api from '../utils/api';
 
 export default function LoanApplication() {
-  const [loanAmount, setLoanAmount] = useState(25000);
-  const [salary, setSalary] = useState(75000);
-  const [creditScore, setCreditScore] = useState(680);
+  const [loanAmount, setLoanAmount] = useState();
+  const [salary, setSalary] = useState();
+  const [creditScore, setCreditScore] = useState();
   const [employment, setEmployment] = useState("Salaried");
   const [education, setEducation] = useState("Graduate");
   const [purpose, setPurpose] = useState("Personal Use");
