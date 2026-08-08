@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
   Building2, Users, FileText, CheckCircle2, XCircle, Clock, 
@@ -15,6 +15,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [activeTab, setActiveTab] = useState('overview');
   const [updatingId, setUpdatingId] = useState(null);
 
   const navigate = useNavigate();
@@ -26,9 +27,9 @@ export default function AdminDashboard() {
         navigate('/login');
         return;
       }
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      const res = await axios.get('http://127.0.0.1:8000/api/dashboard');
+      const res = await api.get('/api/dashboard');
       if (res.data.role !== 'admin') {
         navigate('/dashboard');
         return;
@@ -48,7 +49,7 @@ export default function AdminDashboard() {
   const handleOverrideStatus = async (appId, newStatus) => {
     setUpdatingId(appId);
     try {
-      await axios.put(`http://127.0.0.1:8000/api/loan/${appId}/status`, {
+      await api.put(`/api/loan/${appId}/status`, {
         status: newStatus
       });
       fetchData();

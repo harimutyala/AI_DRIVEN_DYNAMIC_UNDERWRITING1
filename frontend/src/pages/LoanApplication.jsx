@@ -7,14 +7,15 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { formatErrorMessage } from '../utils/errorUtils';
+import api from '../utils/api';
 
 export default function LoanApplication() {
-  const [loanAmount, setLoanAmount] = useState('25000');
-  const [salary, setSalary] = useState('75000');
-  const [creditScore, setCreditScore] = useState('680');
-  const [employment, setEmployment] = useState('Salaried');
-  const [education, setEducation] = useState('Graduate');
-  const [purpose, setPurpose] = useState('Personal');
+  const [loanAmount, setLoanAmount] = useState(25000);
+  const [salary, setSalary] = useState(75000);
+  const [creditScore, setCreditScore] = useState(680);
+  const [employment, setEmployment] = useState("Salaried");
+  const [education, setEducation] = useState("Graduate");
+  const [purpose, setPurpose] = useState("Personal Use");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -28,8 +29,8 @@ export default function LoanApplication() {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const res = await axios.get('http://127.0.0.1:8000/api/dashboard');
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        const res = await api.get('/api/dashboard');
         if (res.data.has_active_loan) {
           setActiveLoanInfo(res.data);
         }
@@ -79,9 +80,9 @@ export default function LoanApplication() {
         navigate('/login');
         return;
       }
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      const res = await axios.post('http://127.0.0.1:8000/api/loan/apply', {
+      const res = await api.post('/api/loan/apply', {
         loan_amount: parseFloat(loanAmount),
         salary: parseFloat(salary),
         credit_score: parseInt(creditScore),

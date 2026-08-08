@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { ShieldCheck, Mail, Lock, ArrowRight, Activity, CheckCircle2 } from 'lucide-react';
 import { formatErrorMessage } from '../utils/errorUtils';
@@ -18,7 +19,7 @@ export default function Login() {
     setSuccessMsg('');
     setLoading(true);
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/auth/login', {
+      const res = await api.post('/api/auth/login', {
         email: loginEmail.trim(),
         password: loginPassword.trim(),
       });
@@ -31,7 +32,8 @@ export default function Login() {
       localStorage.setItem('name', name);
       localStorage.setItem('email', userEmail);
       
-      // Set axios authorization header
+      // Set api & default headers
+      api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       
       if (role === 'admin') {

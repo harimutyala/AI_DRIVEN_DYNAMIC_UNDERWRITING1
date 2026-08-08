@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ShieldAlert, ShieldCheck, ArrowLeft, AlertTriangle, 
@@ -22,9 +22,9 @@ export default function FraudReportPage() {
         navigate('/login');
         return;
       }
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      const res = await axios.get(`http://127.0.0.1:8000/api/fraud/report/${id}`);
+      const res = await api.get(`/api/fraud/report/${id}`);
       setReport(res.data);
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to load fraud report');

@@ -8,35 +8,36 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { formatErrorMessage } from '../utils/errorUtils';
+import api from '../utils/api';
 
 export default function CustomerDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Consent states
+  // Consent State
   const [consent, setConsent] = useState({
-    employment: false,
-    education: false,
-    professional: false,
-    public_data: false,
-    digital_data: false,
-    utility_telecom: false,
-    bank_cashflow: false
+    employment: true,
+    education: true,
+    professional: true,
+    public_data: true,
+    digital_data: true,
+    utility_telecom: true,
+    bank_cashflow: true
   });
-  
-  // Apply Loan States
-  const [loanAmount, setLoanAmount] = useState('25000');
-  const [salary, setSalary] = useState('65000');
-  const [creditScore, setCreditScore] = useState('650');
+
+  // Application form state
+  const [loanAmount, setLoanAmount] = useState(25000);
+  const [salary, setSalary] = useState(65000);
+  const [creditScore, setCreditScore] = useState(650);
   const [employment, setEmployment] = useState('Salaried');
   const [education, setEducation] = useState('Graduate');
   const [submittingApp, setSubmittingApp] = useState(false);
   const [clearingLoan, setClearingLoan] = useState(false);
 
-  // Simulation States
+  // Behavior simulation state
   const [simMonth, setSimMonth] = useState('1');
-  const [simSalary, setSimSalary] = useState(true);
+  const [simSalary, setSimSalary] = useState(5500);
   const [simRepayment, setSimRepayment] = useState('On-Time');
   const [simAnomaly, setSimAnomaly] = useState(false);
   const [simulating, setSimulating] = useState(false);
@@ -46,7 +47,7 @@ export default function CustomerDashboard() {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/dashboard');
+      const res = await api.get('/api/dashboard');
       if (res.data.role !== 'customer') {
         navigate('/admin');
         return;
@@ -74,6 +75,7 @@ export default function CustomerDashboard() {
       return;
     }
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     fetchData();
   }, []);
 
@@ -84,7 +86,7 @@ export default function CustomerDashboard() {
 
   const handleSaveConsent = async () => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/consent', consent);
+      const res = await api.post('/api/consent', consent);
       fetchData();
     } catch (err) {
       alert('Error updating consent: ' + (err.response?.data?.detail || err.message));
@@ -95,7 +97,7 @@ export default function CustomerDashboard() {
     e.preventDefault();
     setSubmittingApp(true);
     try {
-      await axios.post('http://127.0.0.1:8000/api/loan/apply', {
+      await api.post('/api/loan/apply', {
         loan_amount: parseFloat(loanAmount),
         salary: parseFloat(salary),
         credit_score: parseInt(creditScore),
@@ -114,7 +116,7 @@ export default function CustomerDashboard() {
     if (!window.confirm("Are you sure you want to repay and clear your active loan?")) return;
     setClearingLoan(true);
     try {
-      await axios.post(`http://127.0.0.1:8000/api/loan/${appId}/clear`);
+      await api.post(`/api/loan/${appId}/clear`);
       alert("🎉 Loan successfully cleared and paid off! You can now apply for a new loan.");
       fetchData();
     } catch (err) {
@@ -127,7 +129,7 @@ export default function CustomerDashboard() {
   const triggerSimulation = async () => {
     setSimulating(true);
     try {
-      await axios.post('http://127.0.0.1:8000/api/behaviour/simulate', null, {
+      await api.post('/api/behaviour/simulate', null, {
         params: {
           month: parseInt(simMonth),
           salary_received: simSalary,

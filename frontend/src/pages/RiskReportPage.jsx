@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
   BarChart2, FileText, ArrowLeft, ShieldCheck, Sparkles, 
@@ -24,11 +24,11 @@ export default function RiskReportPage() {
         navigate('/login');
         return;
       }
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
       const [riskRes, appRes] = await Promise.all([
-        axios.get(`http://127.0.0.1:8000/api/risk/report/${id}`),
-        axios.get(`http://127.0.0.1:8000/api/loan/${id}`)
+        api.get(`/api/risk/report/${id}`),
+        api.get(`/api/loan/${id}`)
       ]);
 
       setReport(riskRes.data);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, CheckSquare, Square, Save, ArrowLeft, Info, CheckCircle2, Lock } from 'lucide-react';
 import Navbar from '../components/Navbar';
@@ -7,13 +7,13 @@ import { formatErrorMessage } from '../utils/errorUtils';
 
 export default function ConsentPage() {
   const [consent, setConsent] = useState({
-    employment: false,
-    education: false,
-    professional: false,
-    public_data: false,
-    digital_data: false,
-    utility_telecom: false,
-    bank_cashflow: false
+    employment: true,
+    education: true,
+    professional: true,
+    public_data: true,
+    digital_data: true,
+    utility_telecom: true,
+    bank_cashflow: true
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -27,8 +27,8 @@ export default function ConsentPage() {
         navigate('/login');
         return;
       }
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      const res = await axios.get('http://127.0.0.1:8000/api/consent');
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      const res = await api.get('/api/consent');
       setConsent(res.data);
     } catch (err) {
       console.error(err);
@@ -53,7 +53,7 @@ export default function ConsentPage() {
     setSaving(true);
     setMessage('');
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/consent', consent);
+      const res = await api.post('/api/consent', consent);
       setConsent(res.data);
       setMessage('Consent preferences updated successfully!');
       setTimeout(() => setMessage(''), 4000);

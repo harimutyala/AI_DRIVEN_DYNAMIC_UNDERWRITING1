@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
+import api from './utils/api';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -12,9 +14,21 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProfilePage from './pages/ProfilePage';
 import './App.css';
 
+// Ensure Authorization header is configured
+const token = localStorage.getItem('token');
+if (token) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+}
+
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
+
+  if (token) {
+    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  }
 
   if (!token) {
     return <Navigate to="/login" replace />;

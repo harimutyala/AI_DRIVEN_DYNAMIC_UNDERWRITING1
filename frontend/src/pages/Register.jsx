@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import api from '../utils/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShieldCheck, Mail, Lock, User, ArrowRight, Activity, Building2 } from 'lucide-react';
 import { formatErrorMessage } from '../utils/errorUtils';
@@ -19,7 +20,7 @@ export default function Register() {
     setLoading(true);
     try {
       // 1. Register User Account
-      await axios.post('http://127.0.0.1:8000/api/auth/register', {
+      await api.post('/api/auth/register', {
         name,
         email,
         password,
@@ -27,7 +28,7 @@ export default function Register() {
       });
 
       // 2. Auto-login immediately for seamless user onboarding
-      const loginRes = await axios.post('http://127.0.0.1:8000/api/auth/login', {
+      const loginRes = await api.post('/api/auth/login', {
         email,
         password,
       });
@@ -40,6 +41,7 @@ export default function Register() {
       localStorage.setItem('email', userEmail);
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
 
       // 3. Redirect to dashboard
       if (userRole === 'admin') {
