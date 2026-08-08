@@ -1,0 +1,23 @@
+services:
+  # 1. FastAPI AI Backend Engine Service
+  - type: web
+    name: dynamic-underwriting-backend
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: "pip install -r requirements.txt && python backend/seed.py"
+    startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+
+  # 2. React Vite Frontend Web App
+  - type: static
+    name: dynamic-underwriting-frontend
+    region: singapore
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: "./frontend/dist"
+    routes:
+      - type: rewrite
+        source: "/*"
+        destination: "/index.html"
