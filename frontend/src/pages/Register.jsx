@@ -96,7 +96,7 @@ export default function Register() {
                 autoComplete="off"
                 spellCheck={false}
                 className="w-full pl-9 pr-4 py-2.5 bg-brand-bg/50 border border-brand-border rounded-xl text-xs text-brand-text placeholder-brand-muted focus:outline-none focus:border-brand-primary transition-all"
-                placeholder="MUTYALA HARI"
+                placeholder=""
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
@@ -117,7 +117,7 @@ export default function Register() {
                 autoComplete="off"
                 spellCheck={false}
                 className="w-full pl-9 pr-4 py-2.5 bg-brand-bg/50 border border-brand-border rounded-xl text-xs text-brand-text placeholder-brand-muted focus:outline-none focus:border-brand-primary transition-all"
-                placeholder="harimutyala2004@gmail.com"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -139,7 +139,7 @@ export default function Register() {
                 autoComplete="new-password"
                 spellCheck={false}
                 className="w-full pl-9 pr-4 py-2.5 bg-brand-bg/50 border border-brand-border rounded-xl text-xs text-brand-text placeholder-brand-muted focus:outline-none focus:border-brand-primary transition-all"
-                placeholder="••••••••"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

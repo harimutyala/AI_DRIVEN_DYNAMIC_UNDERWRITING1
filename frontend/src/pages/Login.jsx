@@ -112,7 +112,7 @@ export default function Login() {
                 autoComplete="off"
                 spellCheck={false}
                 className="w-full pl-9 pr-4 py-2.5 bg-brand-bg/50 border border-brand-border rounded-xl text-xs text-brand-text placeholder-brand-muted focus:outline-none focus:border-brand-primary transition-all font-sans font-medium"
-                placeholder="you@example.com"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -133,7 +133,7 @@ export default function Login() {
                 autoComplete="new-password"
                 spellCheck={false}
                 className="w-full pl-9 pr-4 py-2.5 bg-brand-bg/50 border border-brand-border rounded-xl text-xs text-brand-text placeholder-brand-muted focus:outline-none focus:border-brand-primary transition-all font-sans font-medium"
-                placeholder="••••••••"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
