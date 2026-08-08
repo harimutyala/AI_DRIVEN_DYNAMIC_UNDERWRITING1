@@ -15,7 +15,7 @@ class RiskAgent:
         """
         features = state.get("engineered_features", {})
         
-        # Query XGBoost Model
+        # Query XGBoost Model / Analytical Risk Engine
         res = risk_engine.predict_risk(
             credit_score=features.get("credit_score", 500),
             salary=features.get("salary", 35000),
@@ -24,7 +24,9 @@ class RiskAgent:
             education_score=features.get("education_score", 5.0),
             linkedin_score=features.get("linkedin_score", 5.0),
             device_trust_score=features.get("device_trust_score", 5.0),
-            email_trust_score=features.get("email_trust_score", 5.0)
+            email_trust_score=features.get("email_trust_score", 5.0),
+            utility_score=features.get("utility_score", 5.0),
+            bank_cashflow_score=features.get("bank_cashflow_score", 5.0)
         )
         
         # Save Risk Report to database

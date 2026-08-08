@@ -36,6 +36,8 @@ class ConsentUpdate(BaseModel):
     professional: bool = False
     public_data: bool = False
     digital_data: bool = False
+    utility_telecom: bool = False
+    bank_cashflow: bool = False
 
 class ConsentResponse(BaseModel):
     user_id: int
@@ -44,6 +46,8 @@ class ConsentResponse(BaseModel):
     professional: bool
     public_data: bool
     digital_data: bool
+    utility_telecom: bool = False
+    bank_cashflow: bool = False
     timestamp: datetime
     class Config:
         from_attributes = True
@@ -70,7 +74,7 @@ class LoanResponse(BaseModel):
         from_attributes = True
 
 class LoanUpdate(BaseModel):
-    status: str = Field(..., pattern="^(Approved|Rejected|Pending)$")
+    status: str = Field(..., pattern="^(Approved|Rejected|Pending|Cleared)$")
 
 # Audit Schema
 class AuditLogResponse(BaseModel):
@@ -126,6 +130,8 @@ class FraudReportResponse(BaseModel):
 # Dashboard Response Schemas
 class CustomerDashboardStats(BaseModel):
     loan_status: str
+    has_active_loan: bool = False
+    can_apply: bool = True
     loan_details: Optional[LoanResponse] = None
     risk_report: Optional[RiskReportResponse] = None
     fraud_report: Optional[FraudReportResponse] = None
@@ -140,6 +146,7 @@ class AdminDashboardStats(BaseModel):
     approved_count: int
     rejected_count: int
     pending_count: int
+    cleared_count: int = 0
     average_loan_amount: float
     average_risk_score: float
     high_fraud_risk_count: int

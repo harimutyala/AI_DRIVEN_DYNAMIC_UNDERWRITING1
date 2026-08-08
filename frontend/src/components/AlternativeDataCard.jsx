@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linkedin, GraduationCap, Briefcase, Smartphone, CheckCircle, Lock } from 'lucide-react';
+import { Linkedin, GraduationCap, Briefcase, Smartphone, CheckCircle, Lock, Zap, Landmark } from 'lucide-react';
 
 export default function AlternativeDataCard({ alternativeData, consent }) {
   if (!alternativeData) {
@@ -14,7 +14,7 @@ export default function AlternativeDataCard({ alternativeData, consent }) {
     );
   }
 
-  const { linkedin, employment, education, digital } = alternativeData;
+  const { linkedin, employment, education, digital, utility_telecom, bank_cashflow } = alternativeData;
 
   return (
     <div className="p-5 rounded-2xl bg-[#161f32]/80 border border-[#23304a] space-y-4">
@@ -37,7 +37,7 @@ export default function AlternativeDataCard({ alternativeData, consent }) {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-white">{linkedin.name || 'Rahul'}</span>
+                <span className="text-xs font-bold text-white">{linkedin.name || 'Applicant'}</span>
                 {linkedin.profile_verified && (
                   <CheckCircle className="w-3.5 h-3.5 text-sky-400" title="Verified Profile" />
                 )}
@@ -76,10 +76,38 @@ export default function AlternativeDataCard({ alternativeData, consent }) {
           </div>
         )}
 
+        {/* Utility Bills Card */}
+        {utility_telecom && (
+          <div className="p-3 bg-[#0b0f19]/70 rounded-xl border border-[#23304a]/70 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-white">Utility & Telecom Bills</span>
+              <p className="text-[11px] text-slate-300">On-Time Payment: {(utility_telecom.on_time_payment_rate * 100).toFixed(0)}%</p>
+              <span className="text-[10px] text-emerald-400 font-semibold">{utility_telecom.utility_bills_cleared} Bills Cleared • Regular Recharge</span>
+            </div>
+          </div>
+        )}
+
+        {/* Bank Cashflow Card */}
+        {bank_cashflow && (
+          <div className="p-3 bg-[#0b0f19]/70 rounded-xl border border-[#23304a]/70 flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-teal-500/10 text-teal-400">
+              <Landmark className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="text-xs font-bold text-white">Bank Account Cashflow</span>
+              <p className="text-[11px] text-slate-300">Monthly Avg Balance: ${bank_cashflow.monthly_avg_balance?.toLocaleString()}</p>
+              <span className="text-[10px] text-sky-400 font-semibold">{bank_cashflow.cashflow_stability} • Bounce-Free Record</span>
+            </div>
+          </div>
+        )}
+
         {/* Digital Behavior Card */}
         {digital && (
           <div className="p-3 bg-[#0b0f19]/70 rounded-xl border border-[#23304a]/70 flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+            <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>

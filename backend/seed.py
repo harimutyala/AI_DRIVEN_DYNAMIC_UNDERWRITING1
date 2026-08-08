@@ -8,6 +8,7 @@ from backend.auth import get_password_hash
 
 def seed_db():
     print("Initializing Database tables...")
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
@@ -47,7 +48,9 @@ def seed_db():
                 education=True,
                 professional=True,
                 public_data=True,
-                digital_data=True
+                digital_data=True,
+                utility_telecom=True,
+                bank_cashflow=True
             )
             db.add(consent)
             

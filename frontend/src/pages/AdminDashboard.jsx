@@ -129,15 +129,20 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
           <div className="p-4 rounded-2xl bg-[#161f32]/80 border border-[#23304a]">
-            <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Applications</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase block">Total Apps</span>
             <span className="text-2xl font-extrabold text-white mt-1 block">{stats.total_applications}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#161f32]/80 border border-emerald-500/20">
             <span className="text-[10px] font-bold text-emerald-400 uppercase block">Approved</span>
             <span className="text-2xl font-extrabold text-emerald-400 mt-1 block">{stats.approved_count}</span>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#161f32]/80 border border-sky-500/20">
+            <span className="text-[10px] font-bold text-sky-400 uppercase block">Cleared</span>
+            <span className="text-2xl font-extrabold text-sky-400 mt-1 block">{stats.cleared_count || 0}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#161f32]/80 border border-rose-500/20">
@@ -151,12 +156,12 @@ export default function AdminDashboard() {
           </div>
 
           <div className="p-4 rounded-2xl bg-[#161f32]/80 border border-[#23304a]">
-            <span className="text-[10px] font-bold text-slate-400 uppercase block">Avg Loan Amount</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase block">Avg Loan</span>
             <span className="text-xl font-extrabold text-indigo-300 mt-1 block">${Math.round(stats.average_loan_amount).toLocaleString()}</span>
           </div>
 
           <div className="p-4 rounded-2xl bg-[#161f32]/80 border border-[#23304a]">
-            <span className="text-[10px] font-bold text-slate-400 uppercase block">Avg Dynamic Score</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase block">Avg Score</span>
             <span className="text-xl font-extrabold text-sky-400 mt-1 block">{Math.round(stats.average_risk_score)}</span>
           </div>
         </div>
@@ -190,6 +195,7 @@ export default function AdminDashboard() {
               >
                 <option value="All">All Statuses</option>
                 <option value="Approved">Approved</option>
+                <option value="Cleared">Cleared</option>
                 <option value="Pending">Pending</option>
                 <option value="Rejected">Rejected</option>
               </select>
@@ -253,6 +259,7 @@ export default function AdminDashboard() {
                       <td className="p-3">
                         <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
                           app.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                          app.status === 'Cleared' ? 'bg-sky-500/10 text-sky-400 border-sky-500/20' :
                           app.status === 'Rejected' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
                           'bg-amber-500/10 text-amber-400 border-amber-500/20'
                         }`}>
@@ -270,6 +277,16 @@ export default function AdminDashboard() {
                           </Link>
 
                           {/* Quick Overrides */}
+                          {app.status === 'Approved' && (
+                            <button
+                              onClick={() => handleOverrideStatus(app.application_id, 'Cleared')}
+                              disabled={updatingId === app.application_id}
+                              className="p-1.5 rounded-lg bg-sky-500/20 text-sky-400 hover:bg-sky-500/30 transition-colors disabled:opacity-50"
+                              title="Mark Loan as Cleared (Paid Off)"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleOverrideStatus(app.application_id, 'Approved')}
                             disabled={updatingId === app.application_id}

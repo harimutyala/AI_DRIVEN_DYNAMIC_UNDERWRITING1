@@ -26,7 +26,9 @@ class ExplainAgent:
             "education_score": "College pedigree and academic performance",
             "linkedin_score": "LinkedIn profile integrity and verified skills",
             "device_trust_score": "Device metadata fingerprint and verification",
-            "email_trust_score": "Email account creation history"
+            "email_trust_score": "Email account creation history",
+            "utility_score": "Utility & telecom bill payment compliance history",
+            "bank_cashflow_score": "Bank account cashflow stability & average balance"
         }
         
         # Classify shap values into positive impacts and negative impacts on approval
@@ -44,17 +46,24 @@ class ExplainAgent:
         positive_factors.sort(key=lambda x: x[1], reverse=True)
         negative_factors.sort(key=lambda x: x[1])
         
+        # Check if CIBIL compensation boost helped approve loan
+        cibil_score = state.get("engineered_features", {}).get("credit_score", 500)
+        
         # Construct plain text summary
         reasons = []
         if decision == "Approve":
-            intro = "Congratulations! Your loan application has been approved based on a healthy credit risk profile. Key positive elements include: "
+            if cibil_score < 620:
+                intro = "Loan Approved via Alternative Data Compensation! Although your traditional CIBIL credit score is limited, your consented alternative data provided a decisive score boost. Key drivers: "
+            else:
+                intro = "Congratulations! Your loan application has been approved based on a healthy credit risk profile. Key positive elements include: "
+            
             # Add up to 3 positive items
             for item, _ in positive_factors[:3]:
                 reasons.append(item)
             if fraud_res.get("fraud_level") == "Low":
                 reasons.append("Secure verification details (Low Fraud Risk)")
             intro += ", ".join(reasons) + "."
-            if negative_factors:
+            if negative_factors and cibil_score >= 620:
                 intro += f" We noted slight negative impact from: {negative_factors[0][0]}, but it was offset by other parameters."
         else:
             intro = "Unfortunately, we are unable to approve your application at this time. The primary limiting factors were: "
@@ -62,7 +71,7 @@ class ExplainAgent:
                 reasons.append(item)
             if fraud_res.get("fraud_level") in ["High", "Medium"]:
                 reasons.append(f"Suspicious account activity flags ({fraud_res.get('fraud_level')} Fraud Risk)")
-            intro += ", ".join(reasons) + "."
+            intro += ". Tip: Granting additional Alternative Data Consents (such as Utility Bills and Bank Cashflow) can boost your score by up to +160 points!"
             
         explanation = {
             "decision": decision,

@@ -106,6 +106,20 @@ class FeatureAgent:
             dev_age = 180.0
             email_age = 3.0
             phone_ver = 1
+
+        # 6. Utility & Telecom bill payment compliance
+        utility_raw = alt_data.get("utility_telecom")
+        if utility_raw:
+            utility_score = float(utility_raw.get("score", 9.0))
+        else:
+            utility_score = 5.0
+
+        # 7. Bank account cashflow & monthly balance stability
+        cashflow_raw = alt_data.get("bank_cashflow")
+        if cashflow_raw:
+            bank_cashflow_score = float(cashflow_raw.get("score", 9.0))
+        else:
+            bank_cashflow_score = 5.0
             
         features = {
             "credit_score": credit_score,
@@ -116,6 +130,8 @@ class FeatureAgent:
             "linkedin_score": round(linkedin_score, 2),
             "device_trust_score": round(device_trust_score, 2),
             "email_trust_score": round(email_trust_score, 2),
+            "utility_score": round(utility_score, 2),
+            "bank_cashflow_score": round(bank_cashflow_score, 2),
             # Raw fraud model parameters
             "vpn_usage": vpn,
             "multiple_devices": multiple_devs,
@@ -130,7 +146,7 @@ class FeatureAgent:
         state["features_engineered"] = True
         
         # Log audit trail
-        log_message = f"Feature engineering successfully completed. Outputs: Stability={features['job_stability_score']}, Education={features['education_score']}, LinkedIn={features['linkedin_score']}, DeviceTrust={features['device_trust_score']}, EmailTrust={features['email_trust_score']}."
+        log_message = f"Feature engineering successfully completed. Outputs: Stability={features['job_stability_score']}, Education={features['education_score']}, LinkedIn={features['linkedin_score']}, Utility={features['utility_score']}, Cashflow={features['bank_cashflow_score']}."
         audit_log = AuditLog(
             user_id=user_id,
             action="ENGINEER_FEATURES",

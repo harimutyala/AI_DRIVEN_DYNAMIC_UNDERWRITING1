@@ -11,7 +11,9 @@ export default function ConsentPage() {
     education: false,
     professional: false,
     public_data: false,
-    digital_data: false
+    digital_data: false,
+    utility_telecom: false,
+    bank_cashflow: false
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -67,30 +69,56 @@ export default function ConsentPage() {
       key: 'employment',
       title: 'Employment & Payroll Inflows',
       desc: 'Allows ingestion of company tenure, monthly salary verification, and employer stability metrics.',
+      boost: '+35 Pts',
+      cibilHelp: 'Verifies real earning capability',
       icon: '💼'
     },
     {
       key: 'education',
-      title: 'Educational Pedigree',
+      title: 'Educational Pedigree & Degrees',
       desc: 'Allows verification of degree level, university tier, and academic performance indicators.',
+      boost: '+30 Pts',
+      cibilHelp: 'Confirms earning potential for fresh graduates',
       icon: '🎓'
     },
     {
       key: 'professional',
       title: 'Professional Profile (LinkedIn)',
       desc: 'Allows ingestion of verified skills, career longevity, and professional network endorsements.',
+      boost: '+25 Pts',
+      cibilHelp: 'Establishes professional credibility',
       icon: '👔'
+    },
+    {
+      key: 'utility_telecom',
+      title: 'Utility & Telecom Bill Payments',
+      desc: 'Ingests electricity, water, and mobile recharge payment history to prove month-on-month financial discipline.',
+      boost: '+45 Pts',
+      cibilHelp: '🔥 Critical Booster for New-to-Credit & Zero CIBIL Applicants',
+      icon: '⚡'
+    },
+    {
+      key: 'bank_cashflow',
+      title: 'Bank Cashflow & Monthly Statement',
+      desc: 'Analyzes average monthly balance, recurring income frequency, and bounce-free account history.',
+      boost: '+50 Pts',
+      cibilHelp: '🛡️ Directly Compensates for Existing Pending EMIs or Low Bureau Score',
+      icon: '🏦'
     },
     {
       key: 'public_data',
       title: 'Public Records & Legal Filings',
       desc: 'Checks public registry records to confirm zero litigation or insolvency flags.',
+      boost: '+15 Pts',
+      cibilHelp: 'Ensures zero legal risk',
       icon: '🏛️'
     },
     {
       key: 'digital_data',
       title: 'Digital Behavior & Device Metadata',
       desc: 'Allows verification of email account creation age, device trust fingerprint, and UPI payment frequencies.',
+      boost: '+20 Pts',
+      cibilHelp: 'Verifies digital trust & identity stability',
       icon: '📱'
     }
   ];
@@ -100,7 +128,7 @@ export default function ConsentPage() {
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">Module 2</span>
             <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
@@ -110,6 +138,19 @@ export default function ConsentPage() {
             <p className="text-sm text-slate-300 mt-1">
               Alternative financial data is only extracted when explicit customer permission is granted.
             </p>
+          </div>
+        </div>
+
+        {/* Low CIBIL Guidance Callout Banner */}
+        <div className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-indigo-500/15 to-emerald-500/15 border border-amber-500/30 text-slate-200">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">💡</span>
+            <div>
+              <h3 className="text-sm font-bold text-amber-300">How Alternative Data Helps New Borrowers & Low CIBIL Applicants</h3>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                If you have <strong className="text-white">no credit score (first-time borrower)</strong>, a <strong className="text-white">low CIBIL score</strong>, or <strong className="text-white">active pending EMIs</strong>, traditional banks reject loan applications automatically. Our AI engine uses your consented alternative data (utility bill payments, bank cashflows, job stability) to award up to <strong className="text-emerald-400">+160 score points</strong> compensation, allowing us to approve your loan fairly!
+              </p>
+            </div>
           </div>
         </div>
 
@@ -147,10 +188,20 @@ export default function ConsentPage() {
                     <div className="flex items-start gap-4">
                       <span className="text-2xl">{cat.icon}</span>
                       <div>
-                        <h3 className="text-base font-bold text-white flex items-center gap-2">
-                          {cat.title}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-base font-bold text-white flex items-center gap-2">
+                            {cat.title}
+                          </h3>
+                          <span className="text-xs font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                            {cat.boost}
+                          </span>
+                        </div>
                         <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">{cat.desc}</p>
+                        {cat.cibilHelp && (
+                          <span className="inline-block mt-1.5 text-[11px] font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">
+                            {cat.cibilHelp}
+                          </span>
+                        )}
                       </div>
                     </div>
 

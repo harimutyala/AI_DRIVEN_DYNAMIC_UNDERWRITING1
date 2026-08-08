@@ -20,7 +20,9 @@ export default function CustomerDashboard() {
     education: false,
     professional: false,
     public_data: false,
-    digital_data: false
+    digital_data: false,
+    utility_telecom: false,
+    bank_cashflow: false
   });
   
   // Apply Loan States
@@ -30,6 +32,7 @@ export default function CustomerDashboard() {
   const [employment, setEmployment] = useState('Salaried');
   const [education, setEducation] = useState('Graduate');
   const [submittingApp, setSubmittingApp] = useState(false);
+  const [clearingLoan, setClearingLoan] = useState(false);
 
   // Simulation States
   const [simMonth, setSimMonth] = useState('1');
@@ -104,6 +107,20 @@ export default function CustomerDashboard() {
       alert(err.response?.data?.detail || 'Application error');
     } finally {
       setSubmittingApp(false);
+    }
+  };
+
+  const handleClearLoan = async (appId) => {
+    if (!window.confirm("Are you sure you want to repay and clear your active loan?")) return;
+    setClearingLoan(true);
+    try {
+      await axios.post(`http://127.0.0.1:8000/api/loan/${appId}/clear`);
+      alert("🎉 Loan successfully cleared and paid off! You can now apply for a new loan.");
+      fetchData();
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to clear loan');
+    } finally {
+      setClearingLoan(false);
     }
   };
 
@@ -243,49 +260,140 @@ export default function CustomerDashboard() {
         {/* Left Column: Application and Consent */}
         <div className="space-y-8 lg:col-span-1">
           
-          {/* Card 1: Consent Management */}
+          {/* Card 1: Consent Management & CIBIL Booster */}
           <div className="glass-panel rounded-2xl p-6 border border-brand-border/60 shadow-md">
-            <div className="flex items-center gap-2 mb-4">
-              <ShieldCheck className="h-6 w-6 text-brand-primary" />
-              <h2 className="font-extrabold text-lg tracking-wide">Alternative Data Consents</h2>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-6 w-6 text-brand-primary" />
+                <h2 className="font-extrabold text-lg tracking-wide">Alternative Data Consents</h2>
+              </div>
+              <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
+                +160 Pts Max Boost
+              </span>
             </div>
-            <p className="text-xs text-brand-muted mb-5 leading-relaxed font-medium">
+            <p className="text-xs text-brand-muted mb-3 leading-relaxed font-medium">
               We cannot access alternative profile data to boost your credit decision without explicit permission. Toggle consents below to connect verification sources.
             </p>
-            <div className="space-y-3 mb-6">
+
+            {/* Low CIBIL / Zero Credit History Guidance Banner */}
+            <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300">
+              <div className="font-bold flex items-center gap-1.5 text-amber-200 mb-1">
+                <span>⚡</span> Low CIBIL / Zero History Bridge:
+              </div>
+              <p className="text-[11px] text-slate-300 leading-normal">
+                No credit history or poor bureau score? Active alternative consents (Utility bills, Bank cashflow, LinkedIn) provide a direct score boost to approve your application!
+              </p>
+            </div>
+
+            <div className="space-y-2 mb-5">
               {[
-                { key: 'professional', label: 'LinkedIn Profile' },
-                { key: 'employment', label: 'Employment Stability Verification' },
-                { key: 'education', label: 'Education Quality (University Tier)' },
-                { key: 'digital_data', label: 'Digital Behavioral Metrics' },
-                { key: 'public_data', label: 'Public Information' }
-              ].map(({ key, label }) => (
-                <label key={key} className="flex items-center justify-between p-3 rounded-xl bg-brand-bg/50 border border-brand-border/40 hover:border-brand-primary/20 transition-all cursor-pointer">
-                  <span className="text-sm font-semibold">{label}</span>
+                { key: 'employment', label: 'Employment & Payroll Data', boost: '+35 pts' },
+                { key: 'education', label: 'Education Quality (University Tier)', boost: '+30 pts' },
+                { key: 'professional', label: 'LinkedIn Profile & Endorsements', boost: '+25 pts' },
+                { key: 'utility_telecom', label: 'Utility & Telecom Bill Payments', boost: '+45 pts', highlight: true },
+                { key: 'bank_cashflow', label: 'Bank Cashflow & Statements', boost: '+50 pts', highlight: true },
+                { key: 'digital_data', label: 'Digital Behavioral Metrics', boost: '+20 pts' },
+                { key: 'public_data', label: 'Public Records & Filings', boost: '+15 pts' }
+              ].map(({ key, label, boost, highlight }) => (
+                <label 
+                  key={key} 
+                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer ${
+                    highlight 
+                      ? 'bg-indigo-950/40 border-indigo-500/40 hover:border-indigo-400' 
+                      : 'bg-brand-bg/50 border-brand-border/40 hover:border-brand-primary/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold">{label}</span>
+                    <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      {boost}
+                    </span>
+                  </div>
                   <input 
                     type="checkbox" 
-                    className="h-5 w-5 rounded border-brand-border accent-brand-primary focus:ring-brand-primary text-brand-bg"
-                    checked={consent[key]}
+                    className="h-4 w-4 rounded border-brand-border accent-brand-primary focus:ring-brand-primary text-brand-bg shrink-0"
+                    checked={consent[key] || false}
                     onChange={(e) => setConsent(prev => ({ ...prev, [key]: e.target.checked }))}
                   />
                 </label>
               ))}
             </div>
+
             <button
               onClick={handleSaveConsent}
-              className="w-full py-2 bg-brand-primary hover:brightness-110 text-brand-text font-bold rounded-xl text-sm transition-all shadow-sm cursor-pointer"
+              className="w-full py-2.5 bg-brand-primary hover:brightness-110 text-brand-text font-bold rounded-xl text-xs transition-all shadow-md cursor-pointer"
             >
-              Update Consent Settings
+              Save & Apply Consent Boosters
             </button>
           </div>
 
-          {/* Card 2: Application Form or Status */}
-          {data?.loan_status === 'NoApplication' ? (
-            <div className="glass-panel rounded-2xl p-6 border border-brand-border/60 shadow-md">
-              <div className="flex items-center gap-2 mb-4">
+          {/* Alternative Data Credit Advisor Card */}
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-900/30 via-[#161f32] to-slate-900 border border-indigo-500/30 shadow-lg space-y-3">
+            <div className="flex items-center justify-between border-b border-indigo-500/20 pb-2">
+              <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-amber-400" /> CIBIL Score Compensation Breakdown
+              </h3>
+              <span className="text-[10px] font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                AI Active
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-center pt-1">
+              <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-700/60">
+                <span className="text-[10px] text-slate-400 block font-medium">Bureau Base CIBIL</span>
+                <span className="text-base font-extrabold text-slate-200">{data?.risk_report?.base_score || creditScore || 520}</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-indigo-950/60 border border-indigo-500/40">
+                <span className="text-[10px] text-indigo-300 block font-medium">Alt Data Boost</span>
+                <span className="text-base font-extrabold text-emerald-400">
+                  +{
+                    (consent.employment ? 35 : 0) +
+                    (consent.education ? 30 : 0) +
+                    (consent.professional ? 25 : 0) +
+                    (consent.utility_telecom ? 45 : 0) +
+                    (consent.bank_cashflow ? 50 : 0) +
+                    (consent.digital_data ? 20 : 0) +
+                    (consent.public_data ? 15 : 0)
+                  } pts
+                </span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-300 leading-relaxed font-medium bg-slate-900/40 p-2.5 rounded-xl border border-slate-800">
+              {(consent.utility_telecom && consent.bank_cashflow) ? (
+                <span className="text-emerald-300 font-semibold">
+                  🛡️ Both Utility Bills & Bank Cashflow consents are active! Your profile benefits from maximum CIBIL compensation.
+                </span>
+              ) : (
+                <span className="text-amber-300">
+                  💡 Tip for Low CIBIL / Pending EMIs: Grant <strong className="text-white">Utility Payments</strong> (+45 pts) and <strong className="text-white">Bank Cashflow</strong> (+50 pts) consents to maximize your loan approval odds!
+                </span>
+              )}
+            </p>
+          </div>
+
+          {/* Card 2: Application Form or Active Loan Card */}
+          {data?.can_apply ? (
+            <div className="glass-panel rounded-2xl p-6 border border-brand-border/60 shadow-md space-y-4">
+              <div className="flex items-center gap-2 mb-2">
                 <FileText className="h-6 w-6 text-brand-secondary" />
                 <h2 className="font-extrabold text-lg tracking-wide">Submit Loan Application</h2>
               </div>
+
+              {data?.loan_status === 'Cleared' && (
+                <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-semibold flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 shrink-0 text-sky-400" />
+                  <span>🎉 Previous Loan #{data?.loan_details?.application_id} Cleared! You are now eligible to apply for a new loan below.</span>
+                </div>
+              )}
+
+              {data?.loan_status === 'Rejected' && (
+                <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-semibold flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 shrink-0 text-rose-400" />
+                  <span>Previous Application #{data?.loan_details?.application_id} was Rejected. You may submit a new application below.</span>
+                </div>
+              )}
+
               <form onSubmit={submitLoanApplication} className="space-y-4">
                 <div>
                   <label className="block text-xs font-semibold text-brand-muted mb-1">Loan Amount ($)</label>
@@ -346,32 +454,63 @@ export default function CustomerDashboard() {
               </form>
             </div>
           ) : (
-            <div className="glass-panel rounded-2xl p-6 border border-brand-border/60 shadow-md">
-              <span className="text-xs font-bold text-brand-muted uppercase tracking-wider block mb-1">Application File</span>
-              <h3 className="font-extrabold text-2xl mb-4">File #{data?.loan_details?.application_id}</h3>
+            <div className="glass-panel rounded-2xl p-6 border border-brand-border/60 shadow-md space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-brand-muted uppercase tracking-wider block">Active Application File</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Single Loan Policy Active
+                </span>
+              </div>
+              <h3 className="font-extrabold text-2xl">File #{data?.loan_details?.application_id}</h3>
               
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <div className="flex justify-between border-b border-brand-border/40 pb-2">
                   <span className="text-sm font-semibold text-brand-muted">Status</span>
                   <span className={`text-sm font-extrabold px-3 py-0.5 rounded-full ${
                     data?.loan_status === 'Approved' ? 'bg-brand-success/10 text-brand-success border border-brand-success/30' :
                     data?.loan_status === 'Rejected' ? 'bg-brand-danger/10 text-brand-danger border border-brand-danger/30' :
+                    data?.loan_status === 'Cleared' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/30' :
                     'bg-brand-warning/10 text-brand-warning border border-brand-warning/30'
                   }`}>{data?.loan_status}</span>
                 </div>
                 <div className="flex justify-between border-b border-brand-border/40 pb-2">
                   <span className="text-sm font-semibold text-brand-muted">Amount Requested</span>
-                  <span className="text-sm font-bold text-brand-text">${data?.loan_details?.loan_amount.toLocaleString()}</span>
+                  <span className="text-sm font-bold text-brand-text">${data?.loan_details?.loan_amount?.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between border-b border-brand-border/40 pb-2">
                   <span className="text-sm font-semibold text-brand-muted">Declared Income</span>
-                  <span className="text-sm font-bold text-brand-text">${data?.loan_details?.salary.toLocaleString()} /yr</span>
+                  <span className="text-sm font-bold text-brand-text">${data?.loan_details?.salary?.toLocaleString()} /yr</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between border-b border-brand-border/40 pb-2">
                   <span className="text-sm font-semibold text-brand-muted">Bureau Score</span>
                   <span className="text-sm font-bold text-brand-text">{data?.loan_details?.credit_score}</span>
                 </div>
               </div>
+
+              {/* Active Loan Actions & Restrictions */}
+              {data?.loan_status === 'Approved' && (
+                <div className="pt-2 border-t border-brand-border/40 space-y-3">
+                  <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium">
+                    ✨ Your loan is currently <strong>Approved and Active</strong>. To apply for a new loan, you must pay off and clear this active loan.
+                  </div>
+                  <button
+                    onClick={() => handleClearLoan(data?.loan_details?.application_id)}
+                    disabled={clearingLoan}
+                    className="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:brightness-110 text-white font-extrabold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 text-xs"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    {clearingLoan ? 'Processing Repayment...' : '💳 Repay & Clear Active Loan'}
+                  </button>
+                </div>
+              )}
+
+              {data?.loan_status === 'Pending' && (
+                <div className="pt-2 border-t border-brand-border/40">
+                  <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-medium">
+                    ⏳ Your loan application is under multi-agent AI underwriting evaluation. You cannot submit another application while one is pending.
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

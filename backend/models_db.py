@@ -30,6 +30,8 @@ class Consent(Base):
     professional = Column(Boolean, default=False)
     public_data = Column(Boolean, default=False)
     digital_data = Column(Boolean, default=False)
+    utility_telecom = Column(Boolean, default=False)
+    bank_cashflow = Column(Boolean, default=False)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships
@@ -62,6 +64,8 @@ class AlternativeData(Base):
     employment_json = Column(Text, nullable=True) # Employment verification profile
     education_json = Column(Text, nullable=True) # Education profile
     digital_json = Column(Text, nullable=True) # Digital behaviour metrics
+    utility_json = Column(Text, nullable=True) # Utility & telecom bill metrics
+    cashflow_json = Column(Text, nullable=True) # Bank cashflow metrics
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships

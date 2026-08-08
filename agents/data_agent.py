@@ -75,6 +75,23 @@ class DataAgent:
                 "impossible_login": False
             }
 
+    def get_mock_utility(self):
+        return {
+            "on_time_payment_rate": 0.98,
+            "utility_bills_cleared": 24,
+            "telecom_recharge_frequency": "Monthly Regular",
+            "score": 9.2
+        }
+
+    def get_mock_bank_cashflow(self):
+        return {
+            "monthly_avg_inflow": 78000.0,
+            "monthly_avg_balance": 24500.0,
+            "cashflow_stability": "High Stability",
+            "zero_bounce_record": True,
+            "score": 9.0
+        }
+
     def run(self, user_id: int, application_id: int, traditional_data: dict) -> dict:
         """
         Gathers mock alternative data based on the user's consent flags.
@@ -102,6 +119,8 @@ class DataAgent:
         education_data = self.get_mock_education(edu_tier) if consent.get("education") else None
         
         digital_data = self.get_mock_digital(is_anomalous) if consent.get("digital_data") else None
+        utility_data = self.get_mock_utility() if consent.get("utility_telecom") else None
+        cashflow_data = self.get_mock_bank_cashflow() if consent.get("bank_cashflow") else None
         
         # Save alternative data snapshot to DB
         alt_db = AlternativeData(
@@ -109,7 +128,9 @@ class DataAgent:
             linkedin_json=json.dumps(linkedin_data) if linkedin_data else None,
             employment_json=json.dumps(employment_data) if employment_data else None,
             education_json=json.dumps(education_data) if education_data else None,
-            digital_json=json.dumps(digital_data) if digital_data else None
+            digital_json=json.dumps(digital_data) if digital_data else None,
+            utility_json=json.dumps(utility_data) if utility_data else None,
+            cashflow_json=json.dumps(cashflow_data) if cashflow_data else None
         )
         
         self.db.add(alt_db)
@@ -120,7 +141,9 @@ class DataAgent:
             "linkedin": linkedin_data,
             "employment_verification": employment_data,
             "education_verification": education_data,
-            "digital_behaviour": digital_data
+            "digital_behaviour": digital_data,
+            "utility_telecom": utility_data,
+            "bank_cashflow": cashflow_data
         }
         
         traditional_data["alternative_data"] = collected_data

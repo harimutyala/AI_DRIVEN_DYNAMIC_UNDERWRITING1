@@ -156,10 +156,23 @@ def update_user_consent(consent_in: ConsentUpdate, current_user: User = Depends(
 
 @app.post("/api/loan/apply", response_model=Dict[str, Any])
 def apply_loan(loan_in: LoanApply, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Limit to one active application for simplicity
-    existing_app = db.query(Application).filter(Application.user_id == current_user.id, Application.status == "Pending").first()
-    if existing_app:
-        raise HTTPException(status_code=400, detail="You already have an active pending loan application.")
+    # Restrict user to ONE active loan/application at a time
+    active_app = db.query(Application).filter(
+        Application.user_id == current_user.id,
+        Application.status.in_(["Pending", "Approved"])
+    ).first()
+    
+    if active_app:
+        if active_app.status == "Pending":
+            raise HTTPException(
+                status_code=400,
+                detail=f"You already have a pending loan application (#{active_app.application_id}) under review. Please wait for a decision."
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"You currently have an active loan (#{active_app.application_id}). You must clear/repay your active loan before applying for a new one."
+            )
         
     # 1. Save Traditional Application Record
     app_db = Application(
@@ -199,8 +212,35 @@ def apply_loan(loan_in: LoanApply, current_user: User = Depends(get_current_user
             "agent_state": agent_state
         }
     except Exception as e:
-        db.rollback()
+        app_db.status = "Failed"
+        db.commit()
         raise HTTPException(status_code=500, detail=f"AI Underwriting Orchestration failed: {str(e)}")
+
+@app.post("/api/loan/{application_id}/clear", response_model=LoanResponse)
+def clear_loan(application_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    app_db = db.query(Application).filter(Application.application_id == application_id).first()
+    if not app_db:
+        raise HTTPException(status_code=404, detail="Application not found")
+        
+    if current_user.role != "admin" and app_db.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to clear this application")
+        
+    old_status = app_db.status
+    app_db.status = "Cleared"
+    db.commit()
+    db.refresh(app_db)
+    
+    audit_log = AuditLog(
+        user_id=current_user.id,
+        action="CLEAR_LOAN_REPAYMENT",
+        agent_name="Loan Module",
+        status="Success",
+        log_message=f"Loan #{application_id} (${app_db.loan_amount:.2f}) was successfully paid off and cleared."
+    )
+    db.add(audit_log)
+    db.commit()
+    
+    return app_db
 
 @app.get("/api/loan/{application_id}", response_model=LoanResponse)
 def get_loan(application_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -386,6 +426,7 @@ def get_dashboard_data(current_user: User = Depends(get_current_user), db: Sessi
         approved = sum(1 for a in apps if a.status == "Approved")
         rejected = sum(1 for a in apps if a.status == "Rejected")
         pending = sum(1 for a in apps if a.status == "Pending")
+        cleared = sum(1 for a in apps if a.status == "Cleared")
         
         avg_loan = sum(a.loan_amount for a in apps) / max(total_apps, 1)
         
@@ -429,6 +470,7 @@ def get_dashboard_data(current_user: User = Depends(get_current_user), db: Sessi
                 "approved_count": approved,
                 "rejected_count": rejected,
                 "pending_count": pending,
+                "cleared_count": cleared,
                 "average_loan_amount": avg_loan,
                 "average_risk_score": avg_risk,
                 "high_fraud_risk_count": high_fraud
@@ -439,9 +481,21 @@ def get_dashboard_data(current_user: User = Depends(get_current_user), db: Sessi
         
     else:
         # CUSTOMER VIEW
-        # Fetch their latest application
-        app_db = db.query(Application).filter(Application.user_id == current_user.id).order_by(Application.created_at.desc()).first()
+        # First query for an active application (Pending or Approved)
+        active_app = db.query(Application).filter(
+            Application.user_id == current_user.id,
+            Application.status.in_(["Pending", "Approved"])
+        ).order_by(Application.created_at.desc()).first()
         
+        if active_app:
+            app_db = active_app
+        else:
+            # Fallback to the latest application (Cleared or Rejected)
+            app_db = db.query(Application).filter(Application.user_id == current_user.id).order_by(Application.created_at.desc()).first()
+            
+        has_active_loan = bool(app_db and app_db.status in ["Pending", "Approved"])
+        can_apply = not has_active_loan
+
         consent = db.query(Consent).filter(Consent.user_id == current_user.id).first()
         alt_data_db = db.query(AlternativeData).filter(AlternativeData.user_id == current_user.id).order_by(AlternativeData.timestamp.desc()).first()
         
@@ -490,6 +544,8 @@ def get_dashboard_data(current_user: User = Depends(get_current_user), db: Sessi
                 "employment": json.loads(alt_data_db.employment_json) if alt_data_db.employment_json else None,
                 "education": json.loads(alt_data_db.education_json) if alt_data_db.education_json else None,
                 "digital": json.loads(alt_data_db.digital_json) if alt_data_db.digital_json else None,
+                "utility_telecom": json.loads(alt_data_db.utility_json) if hasattr(alt_data_db, 'utility_json') and alt_data_db.utility_json else None,
+                "bank_cashflow": json.loads(alt_data_db.cashflow_json) if hasattr(alt_data_db, 'cashflow_json') and alt_data_db.cashflow_json else None,
                 "timestamp": alt_data_db.timestamp
             }
             
@@ -563,6 +619,8 @@ def get_dashboard_data(current_user: User = Depends(get_current_user), db: Sessi
             "user_name": current_user.name,
             "email": current_user.email,
             "loan_status": app_db.status if app_db else "NoApplication",
+            "has_active_loan": has_active_loan,
+            "can_apply": can_apply,
             "loan_details": app_details,
             "risk_report": risk_rep,
             "fraud_report": fraud_rep,
